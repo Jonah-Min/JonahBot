@@ -11,7 +11,7 @@ r = Random.new
 bot = Discordrb::Commands::CommandBot.new 'email@website.com', 'password', '!'
 
 # grab all champions from league of legends api for league commands
-html = open('https://global.api.pvp.net/api/lol/static-data/na/v1.2/champion?api_key=a75795cb-cdc6-4f44-9d16-386c8d00b7ad', 'User-Agent' => 'Ruby').read
+html = open('https://global.api.pvp.net/api/lol/static-data/na/v1.2/champion?api_key= Get Your Own at developer.riotgames.com', 'User-Agent' => 'Ruby').read
 
 response = JSON.parse(html)
 response = response["data"]
