@@ -12,6 +12,8 @@ Discord Voice Chat bot created with Ruby, this utilizes several APIs and concept
   - Reddit API
   - XML Scraper (Nokogiri)
   - HTML Scraper (Also Nokogiri)
+  - MyAnimeList API
+  - Giphy API
   
 Meant to be a way for me to learn and practice Ruby as I have only used once before very briefly. Also a way to 
 learn several useful technologies that I haven't had experience with (XML and HTML scraper).

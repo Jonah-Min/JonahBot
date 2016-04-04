@@ -280,6 +280,41 @@ bot.command :stats do |event, *args|
 
 end
 
+# Random Gif generator based of keywords search
+bot.command :gif do |event, *args|
+
+	search = ''
+	args.each do |str|
+		search = search + str + '+'
+	end
+	search = search[0...-1]
+
+	# Uses public API Beta key will apply for official key
+	url = "http://api.giphy.com/v1/gifs/search?q=" + search + "&api_key=dc6zaTOxFJmzC"
+
+	html = open(url, 'User-Agent' => 'Discord Bot by u/QuantumBogo').read
+	response = JSON.parse(html)
+
+	# Response has any number of gifs for each keyword
+	# I choose one at random
+	data = response['data']
+	count = data.size()
+	random = r.rand(count)
+	counter = 0
+
+	data.each do |child|
+
+		if counter == random
+			event.respond child["url"]
+			break
+		end
+
+		counter = counter + 1
+
+	end
+
+end
+
 # just tells users about different commands
 bot.command :commands do |event|
 	event << ""
@@ -292,6 +327,7 @@ bot.command :commands do |event|
 	event << "!reddit [Subreddit, Category, Number]  - Givens certain number of posts on subreddit by category"
 	event << "!anime [Anime]  - Gives information for the given anime"
 	event << "!manga [Manga]  - Gives information for the given manga \n\n"
+	event << "!gif [Keywords]  - Finds gif under given keywords"
 	event << "Jonah is the best bot creator"
 end
 
