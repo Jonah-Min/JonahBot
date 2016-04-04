@@ -1,4 +1,4 @@
-# jonahbot
+# JonahBot
 Discord Bot Written In Ruby
 
 Dependencies Required:
