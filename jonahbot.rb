@@ -183,7 +183,15 @@ bot.command :anime do |event, *args|
 		response = response + "Type : " + entry.xpath('type').text + "\n\n"
 		response = response + "Episodes : " + entry.xpath('episodes').text + "\n\n"
 		response = response + "Status : " + entry.xpath('status').text + "\n\n"
-		response = response + "Aired : " + entry.xpath('start_date').text + " - " + entry.xpath('end_date').text + "\n\n"
+
+		end_date = entry.xpath('end_date').text
+
+		# If manga is ongoing then the date will be 0000-00-00
+		if end_date == "0000-00-00"
+			end_date = "On-Going"
+		end
+
+		response = response + "Aired : " + entry.xpath('start_date').text + " - " + end_date + "\n\n"
 		response = response + "Synopsis : \n" + entry.xpath('synopsis').text.gsub('<br />', "")
 
 		event.respond response
