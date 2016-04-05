@@ -315,6 +315,43 @@ bot.command :gif do |event, *args|
 
 end
 
+# Pokemon API just a little information
+bot.command :pokedex do |event, arg|
+
+	url = "http://pokeapi.co/api/v2/pokemon/" + arg
+	doc = open(url, "User-Agent" => "Discord Bot").read
+	response = JSON.parse(doc)
+
+	types = []
+
+	response['types'].each do |type|
+		types.push(type['type']['name'])
+	end
+
+	event.respond response["sprites"]["front_default"]
+
+	message = "\nType: "
+
+	for i in 0..(types.size() - 1)
+		message = message + types[i].capitalize + " "
+	end
+
+	message = message + "\n\nIn Games:\n\n"
+
+	games = []
+
+	response["game_indices"].each do |game|
+		games.push(game["version"]["name"].gsub("-", " ").capitalize)
+	end
+
+	for i in 0..(games.size() - 1)
+		message = message + games[i] + "\n"
+	end
+
+	message
+
+end
+
 # just tells users about different commands
 bot.command :commands do |event|
 	event << ""
@@ -326,8 +363,9 @@ bot.command :commands do |event|
 	event << "!stats [Champion, Role] - Returns Stats for champion in given role, if no data from that role, defaults to most played role"
 	event << "!reddit [Subreddit, Category, Number]  - Givens certain number of posts on subreddit by category"
 	event << "!anime [Anime]  - Gives information for the given anime"
-	event << "!manga [Manga]  - Gives information for the given manga \n\n"
+	event << "!manga [Manga]  - Gives information for the given manga"
 	event << "!gif [Keywords]  - Finds gif under given keywords"
+	event << "!pokedex [Pokemon]  - Finds Pokemon's image and gives infromation about what games it's from \n\n"
 	event << "Jonah is the best bot creator"
 end
 
