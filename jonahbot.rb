@@ -183,7 +183,7 @@ bot.command :anime do |event, *args|
 
 	# Grabs data using XML parser Nokogiri
 	# Requires MyAnimeList account
-	doc = Nokogiri::XML(open(url, http_basic_authentication: ["MAL usernae", "MAL password"]))
+	doc = Nokogiri::XML(open(url, http_basic_authentication: ["MAL username", "MAL password"]))
 
 	# Parses through all data of first entry (Some have multiple entries)
 	doc.xpath('//entry').each do |entry|
@@ -225,7 +225,7 @@ bot.command :manga do |event, *args|
 
 	# Uses Nokogiri to parse XML 
 	# Requires MyAnimeList account
-	doc = Nokogiri::XML(open(url, http_basic_authentication: ["MAL account", "MAL password"]))
+	doc = Nokogiri::XML(open(url, http_basic_authentication: ["MAL username", "MAL password"]))
 
 	# Grabs all data from first entry
 	doc.xpath('//entry').each do |entry|
