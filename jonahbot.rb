@@ -4,18 +4,18 @@ require 'discordrb'
 require 'open-uri'
 require 'json'
 require 'nokogiri'
+require 'date'
 
 # creates new random number generator
 r = Random.new
 
 # initialize bot
-# in order to start the bot, it requries a discord account
-# the first argument is the email used to create the account
-bot = Discordrb::Commands::CommandBot.new 'username@email.com', 'password', '!'
+# requires ouath2 https://discordapp.com/developers/docs/topics/oauth2
+bot = Discordrb::Commands::CommandBot.new token: 'TOKEN', application_id: AppID, prefix: '!'
 
 # grab all champions from league of legends api for league commands
-# Requires account on riot games as well as an api key found at developer.riotgames.com
-html = open('https://global.api.pvp.net/api/lol/static-data/na/v1.2/champion?api_key= GET YOURS AT developer.riotgames.com', 'User-Agent' => 'Ruby').read
+# Requires API key found at developer.riotgames.com
+html = open('https://global.api.pvp.net/api/lol/static-data/na/v1.2/champion?api_key=Get Your Key at developer.riotgames.com', 'User-Agent' => 'Ruby').read
 
 response = JSON.parse(html)
 response = response["data"]
@@ -23,20 +23,32 @@ champs = []
 
 response.each { |champ, value| champs.push(champ) }
 
+#Event triggered when bot is ready to be used
+bot.ready do |event|
+	bot.send_message(Channel ID, "hello!")
+end
+
 # Checks for new members joinging the discord channel
 bot.member_join do |event|
 	event.server.general_channel.send_message("#{:member} joined this server!")
 end
 
-# Once it can take commands it will print message to send to channel
-# Requires discord's code for your channel
-bot.ready do 
-	bot.send_message('channel code', "\n Jonah Bot is up and running! \n\n Type !commands for a list of available commands  ^ ^")
-end
-
 # Says hello to the user 
 bot.command :hi do |event|
-	"Hello " + event.user.name + "!"
+
+	greetings = ["Hello", "Good to see you", "It's been a while", "Nice to see you", "Long time no see", "Hey",
+                    "Hi", "Sup", "How are you", "How are you doing", "How is everything going",
+                    "What's up", "How are things", "How's it going", "How's life been treating you", "What's cracking",
+                    "What's good", "What's happening", "What have you been up to"]
+
+    greet = number = r.rand(1..18)
+
+    if greet > 6
+            "#{greetings[greet]} #{event.user.name}?"
+    else
+            "#{greetings[greet]} #{event.user.name}!"
+    end
+
 end
 
 # Chooses random league of legends roles for all of the given names, minimum of 2
@@ -102,8 +114,7 @@ bot.command(:reddit, min_args: 3, max_args: 3) do |_event, *args|
 	end
 
 	# Opens reddit url
-	# Uses user agent in order to make calls
-	html = open(url, 'User-Agent' => 'Discord Bot by u/input username').read
+	html = open(url, 'User-Agent' => 'Discord Bot by u/QuantumBogo').read
 	response = JSON.parse(html)
 
 	response = response["data"]["children"]
@@ -130,18 +141,20 @@ bot.command(:reddit, min_args: 3, max_args: 3) do |_event, *args|
 		end
 	end
 
-	counter = 0
-
-	while counter < number
-		_event.respond "\n" + titles[counter] + "\n\n" + urls[counter] + "\n"
-		counter = counter + 1
+	for i in 0..(number)
+		_event.respond "\n" + titles[i] + "\n\n" + urls[i] + "\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
 	end
 
 end
 
 # Random number generator
 bot.command :roll do |event, arg|
-	r.rand(arg.to_i)
+	r.rand(1..arg.to_i)
+end
+
+# Rolls 2 Die (for stuff like DnD)
+bot.command :roll2 do |event, arg|
+	r.rand(1..arg.to_i) + r.rand(1..arg.to_i)
 end
 
 # Random Coin flip, wierd bug, working on a fix
@@ -166,12 +179,11 @@ bot.command :anime do |event, *args|
 		anime = anime + str + '+'
 	end
 	anime = anime[0...-1]
-	anime.gsub(' ', '+')
 	url = "http://myanimelist.net/api/anime/search.xml?q=" + anime
 
 	# Grabs data using XML parser Nokogiri
-	# Requires My Anime List account to access the api
-	doc = Nokogiri::XML(open(url, http_basic_authentication: ["MAL username", "MAL password"]))
+	# Requires MyAnimeList account
+	doc = Nokogiri::XML(open(url, http_basic_authentication: ["MAL usernae", "MAL password"]))
 
 	# Parses through all data of first entry (Some have multiple entries)
 	doc.xpath('//entry').each do |entry|
@@ -209,12 +221,11 @@ bot.command :manga do |event, *args|
 		manga = manga + str + '+'
 	end
 	manga = manga[0...-1]
-	manga.gsub(' ', '+')
 	url = "http://myanimelist.net/api/manga/search.xml?q=" + manga
 
 	# Uses Nokogiri to parse XML 
-	# Requires My Anime List account to access the api
-	doc = Nokogiri::XML(open(url, http_basic_authentication: ["MAL username", "MAL password"]))
+	# Requires MyAnimeList account
+	doc = Nokogiri::XML(open(url, http_basic_authentication: ["MAL account", "MAL password"]))
 
 	# Grabs all data from first entry
 	doc.xpath('//entry').each do |entry|
@@ -280,7 +291,6 @@ bot.command :stats do |event, *args|
 
 end
 
-# Random Gif generator based of keywords search
 bot.command :gif do |event, *args|
 
 	search = ''
@@ -292,7 +302,7 @@ bot.command :gif do |event, *args|
 	# Uses public API Beta key will apply for official key
 	url = "http://api.giphy.com/v1/gifs/search?q=" + search + "&api_key=dc6zaTOxFJmzC"
 
-	html = open(url, 'User-Agent' => 'Discord Bot by u/QuantumBogo').read
+	html = open(url, 'User-Agent' => 'Discord Bot').read
 	response = JSON.parse(html)
 
 	# Response has any number of gifs for each keyword
@@ -318,56 +328,62 @@ end
 # Pokemon API just a little information
 bot.command :pokedex do |event, arg|
 
-	url = "http://pokeapi.co/api/v2/pokemon/" + arg
-	doc = open(url, "User-Agent" => "Discord Bot").read
-	response = JSON.parse(doc)
+    url = "http://pokeapi.co/api/v2/pokemon/" + arg
+    doc = open(url, "User-Agent" => "Discord Bot").read
+    response = JSON.parse(doc)
 
-	types = []
+    types = []
 
-	response['types'].each do |type|
-		types.push(type['type']['name'])
-	end
+    response['types'].each do |type|
+            types.push(type['type']['name'])
+    end
 
-	event.respond response["sprites"]["front_default"]
+    event.respond response["sprites"]["front_default"]
 
-	message = "\nType: "
+    message = "\n**Type: **"
 
-	for i in 0..(types.size() - 1)
-		message = message + types[i].capitalize + " "
-	end
+    for i in 0..(types.size() - 1)
+            message = message + types[i].capitalize + " "
+    end
 
-	message = message + "\n\nIn Games:\n\n"
+    message = message + "\n\n**Abilities:** \n"
 
-	games = []
+    response['abilities'].each do |ability|
 
-	response["game_indices"].each do |game|
-		games.push(game["version"]["name"].gsub("-", " ").capitalize)
-	end
+        url = ability['ability']['url']
+        doc = open(url, "User-Agent" => "Discord Bot").read
+        effect = JSON.parse(doc)
 
-	for i in 0..(games.size() - 1)
-		message = message + games[i] + "\n"
-	end
+        message = message + "**#{ability['ability']['name']}**:  #{effect['effect_entries'][0]['short_effect']} \n"
 
-	message
+    end
+
+    message = message + "\n"
+
+    response['stats'].each do |stats|
+            message = message + "**#{stats['stat']['name']}**:  #{stats['base_stat'].to_s}\n"
+    end
+
+    message
 
 end
 
 # just tells users about different commands
 bot.command :commands do |event|
 	event << ""
-	event << "!hi  - Gives you a friendly greeting ^ ^"
-	event << "!randomroles [Names]  - Given between 2 to 5 names it chooses random league roles for them"
-	event << "!randomchampion [Number  between 1 - " + champs.size().to_s + "]  - Gives you a number of random champions"
-	event << "!roll [Number]  - Gives you a random number between given number"
-	event << "!coin  - Returns heads or tails"
-	event << "!stats [Champion, Role] - Returns Stats for champion in given role, if no data from that role, defaults to most played role"
-	event << "!reddit [Subreddit, Category, Number]  - Givens certain number of posts on subreddit by category"
-	event << "!anime [Anime]  - Gives information for the given anime"
-	event << "!manga [Manga]  - Gives information for the given manga"
-	event << "!gif [Keywords]  - Finds gif under given keywords"
-	event << "!pokedex [Pokemon]  - Finds Pokemon's image and gives infromation about what games it's from \n\n"
-	event << "Jonah is the best bot creator"
+	event << "__***!hi***__  - Gives you a friendly greeting ^ ^"
+	event << "__***!randomroles [Names]***__  - Given between 2 to 5 names it chooses random league roles for them"
+	event << "__***!randomchampion [Number  between 1 - " + champs.size().to_s + "]***__  - Gives you a number of random champions"
+	event << "__***!roll [Number]***__  - Gives you a random number between given number"
+	event << "__***!roll2 [Number]***__  - Gives you a combination of two dice between the given number"
+	event << "__***!coin***__  - Returns heads or tails"
+	event << "__***!stats [Champion, Role]***__ - Returns Stats for champion in given role, if no data from that role, defaults to most played role"
+	event << "__***!reddit [Subreddit, Category, Number]***__  - Givens certain number of posts on subreddit by category"
+	event << "__***!anime [Anime]***__  - Gives information for the given anime"
+	event << "__***!manga [Manga]***__  - Gives information for the given manga"
+	event << "__***!gif [Keywords]***__  - Finds gif under given keywords"
+	event << "__***!pokedex [Pokemon]***__  - Finds Pokemon's image and gives general information \n\n"
+	event << "__***Jonah is the best bot creator***__"
 end
 
 bot.run
-
